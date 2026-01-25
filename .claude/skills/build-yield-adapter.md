@@ -1,7 +1,23 @@
-# Skill: Build Yield Adapter
+---
+name: building-yield-adapters
+description: Creates yield adapters for DeFi protocols on DefiLlama. Use when the user asks to create, build, or add a new yield adapter for a protocol.
+---
 
-## Trigger
-User asks to create/build a yield adapter for a protocol.
+# Build Yield Adapter
+
+Copy this checklist and track your progress:
+
+```
+Build Progress:
+- [ ] Step 1: Validate protocol exists on DefiLlama
+- [ ] Step 2: Check no existing yield adapter
+- [ ] Step 3: Research protocol (run appropriate research skill)
+- [ ] Step 4: Find reference adapter
+- [ ] Step 5: Create adapter files
+- [ ] Step 6: Test adapter
+- [ ] Step 7: Fix any issues
+- [ ] Step 8: Report summary to user
+```
 
 ## Workflow
 

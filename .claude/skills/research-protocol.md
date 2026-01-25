@@ -1,11 +1,25 @@
-# Skill: Research Protocol
+---
+name: researching-protocols
+description: Researches DeFi protocols for yield adapter development. Use as a general-purpose research skill when the protocol category is unknown or doesn't fit lending, DEX, or liquid staking patterns.
+---
 
-## Purpose
-Gather all information needed to build a yield adapter through systematic research of protocol resources.
+# Research Protocol
 
-## Input
-- Protocol slug (e.g., "aave-v3", "uniswap-v3")
-- Or protocol details from DefiLlama API
+Copy this checklist and track your progress:
+
+```
+Research Progress:
+- [ ] Phase 1: DefiLlama Protocol Info
+- [ ] Phase 2: Existing TVL Adapter
+- [ ] Phase 3: Protocol Website & Documentation
+- [ ] Phase 4: Protocol GitHub Research
+- [ ] Phase 5: Subgraph Discovery
+- [ ] Phase 6: Contract Verification (EVM)
+- [ ] Phase 7: Solana Account Data (if Solana)
+- [ ] Phase 8: API Endpoint Discovery
+- [ ] Phase 9: Price Data
+- [ ] Phase 10: Reference Similar Adapters
+```
 
 ## Research Phases
 
@@ -291,50 +305,6 @@ Before completing research, ensure you have:
 - [ ] Fee structure understood
 - [ ] Token addresses (underlying, receipt, rewards)
 - [ ] Similar adapter identified for reference
-
-## Output Format
-
-After research, compile findings:
-
-```markdown
-## Research Results: {Protocol Name}
-
-### Basic Info
-- Slug: {slug}
-- Category: {category}
-- Chains: {chains}
-- Website: {url}
-
-### Data Source Recommendation
-Primary: {on-chain | subgraph | api}
-Reason: {why this source}
-
-### Contracts Found
-| Chain | Name | Address | Verified |
-|-------|------|---------|----------|
-
-### Subgraph
-- Available: Yes/No
-- Endpoint: {url}
-- Status: {synced/behind/error}
-
-### API Endpoints
-- {endpoint}: {description}
-
-### Key Functions/Data Points
-- {function}: {what it returns}
-
-### APY Calculation
-Method: {description}
-Formula: {formula}
-
-### Reference Adapters
-Similar adapters to use as template:
-- src/adaptors/{name}/ - {why similar}
-
-### Notes
-- {any issues or special considerations}
-```
 
 ## Fallback: Browser Research
 

@@ -1,11 +1,27 @@
-# Skill: Research Lending Protocol
+---
+name: researching-lending-protocols
+description: Researches lending protocols for yield adapter development. Use when building adapters for lending, borrowing, CDP, or money market protocols like Aave, Compound, or their forks.
+---
 
-## Purpose
-Gather all information needed to build a yield adapter for lending protocols (Compound-style, Aave-style, and variants).
+# Research Lending Protocol
 
-## Input
-- Protocol slug (e.g., "aave-v3", "compound-v3", "venus-core-pool")
-- Chain(s) to support
+Copy this checklist and track your progress:
+
+```
+Research Progress:
+- [ ] Phase 1: DefiLlama Protocol Info
+- [ ] Phase 2: Identify Protocol Architecture (Compound vs Aave style)
+- [ ] Phase 3: Documentation Discovery
+- [ ] Phase 4: Existing TVL Adapter
+- [ ] Phase 5: Compound-Style Research (if applicable)
+- [ ] Phase 6: Aave-Style Research (if applicable)
+- [ ] Phase 7: Interest Rate Model Research
+- [ ] Phase 8: Reward Token Research
+- [ ] Phase 9: Liquidation Parameters (LTV)
+- [ ] Phase 10: API Endpoints (alternative)
+- [ ] Phase 11: Reference Adapters
+- [ ] Phase 12: Multi-Chain Configuration
+```
 
 ## Lending Protocol Fundamentals
 

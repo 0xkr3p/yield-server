@@ -1,11 +1,28 @@
-# Skill: Research DEX/AMM Protocol
+---
+name: researching-dex-protocols
+description: Researches DEX and AMM protocols for yield adapter development. Use when building adapters for decentralized exchanges, liquidity pools, or AMMs.
+---
 
-## Purpose
-Gather all information needed to build a yield adapter for DEX and AMM protocols.
+# Research DEX/AMM Protocol
 
-## Input
-- Protocol slug (e.g., "uniswap-v3", "curve", "velodrome")
-- Chain(s) to support
+Copy this checklist and track your progress:
+
+```
+Research Progress:
+- [ ] Phase 1: DefiLlama Protocol Info
+- [ ] Phase 2: Identify DEX Architecture (V2 vs V3)
+- [ ] Phase 3: Documentation Discovery
+- [ ] Phase 4: Existing TVL Adapter
+- [ ] Phase 5: Subgraph Discovery
+- [ ] Phase 6: Fee Structure Research
+- [ ] Phase 7: APY Calculation Method
+- [ ] Phase 8: Reward Tokens (if any)
+- [ ] Phase 9: ve-Tokenomics (if applicable)
+- [ ] Phase 10: On-Chain Data (fallback)
+- [ ] Phase 11: API Endpoints (alternative)
+- [ ] Phase 12: Reference Adapters
+- [ ] Phase 13: GitHub Research
+```
 
 ## DEX Fundamentals
 

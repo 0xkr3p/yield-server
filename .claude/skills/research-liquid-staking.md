@@ -1,11 +1,24 @@
-# Skill: Research Liquid Staking Protocol
+---
+name: researching-liquid-staking
+description: Researches liquid staking protocols for yield adapter development. Use when building adapters for LSTs like Lido, Rocket Pool, Marinade, Jito, or similar staking derivatives.
+---
 
-## Purpose
-Gather all information needed to build a yield adapter for liquid staking protocols (LSTs).
+# Research Liquid Staking Protocol
 
-## Input
-- Protocol slug (e.g., "lido", "rocket-pool", "marinade-finance", "jito")
-- Chain (Ethereum, Solana, etc.)
+Copy this checklist and track your progress:
+
+```
+Research Progress:
+- [ ] Phase 1: DefiLlama Protocol Info
+- [ ] Phase 2: Existing TVL Adapter
+- [ ] Phase 3: Documentation Discovery
+- [ ] Phase 4: Exchange Rate Pattern Detection
+- [ ] Phase 5: Solana Stake Pool Structure (if Solana)
+- [ ] Phase 6: APY Calculation Method
+- [ ] Phase 7: Fee Structure Research
+- [ ] Phase 8: Reference Adapters
+- [ ] Phase 9: GitHub Research
+```
 
 ## LST Fundamentals
 
