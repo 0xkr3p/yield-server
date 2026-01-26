@@ -6,7 +6,10 @@ This repository contains yield adapters for DefiLlama. Each adapter fetches APY 
 
 ## Creating Yield Adapters
 
-When asked to create a yield adapter, follow the skill at `.claude/skills/build-yield-adapter.md`.
+When asked to create a yield adapter, follow the skill at `.claude/skills/build-yield-adapter/SKILL.md`.
+
+## Fixing Yield Adapters
+When asked to fix a yield adapter, follow the skill at `.claude/skills/fix-yield-adapter/SKILL.md`
 
 ### Quick Command Reference
 

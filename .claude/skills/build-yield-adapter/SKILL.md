@@ -45,10 +45,10 @@ Run the research skill based on category:
 
 | Category | Research Skill |
 |----------|----------------|
-| Liquid Staking | `.claude/skills/research-liquid-staking.md` |
-| Lending, CDP | `.claude/skills/research-lending.md` |
-| DEX, AMM | `.claude/skills/research-dex.md` |
-| All others | `.claude/skills/research-protocol.md` |
+| Liquid Staking | `.claude/skills/research-liquid-staking/SKILL.md` |
+| Lending, CDP | `.claude/skills/research-lending/SKILL.md` |
+| DEX, AMM | `.claude/skills/research-dex/SKILL.md` |
+| All others | `.claude/skills/research-protocol/SKILL.md` |
 
 **Research must produce:**
 - Data source (on-chain / subgraph / API)
