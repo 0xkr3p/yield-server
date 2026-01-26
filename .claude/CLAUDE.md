@@ -127,3 +127,50 @@ See existing adapters for reference:
 - **Lending**: `src/adaptors/aave-v3/`, `src/adaptors/compound-v3/`
 - **DEX**: `src/adaptors/uniswap-v3/`, `src/adaptors/curve/`
 - **Yield**: `src/adaptors/yearn-finance/`, `src/adaptors/beefy/`
+
+## Subagents
+
+Custom subagents are available for specialized yield adapter workflows. These should be used proactively when the task matches their purpose.
+
+### Available Subagents
+
+| Subagent | Model | Purpose | When to Use |
+|----------|-------|---------|-------------|
+| `research-protocol` | sonnet | Gather technical details for adapter development | Before building new adapters, investigating unfamiliar protocols |
+| `build-adapter` | opus | Create complete yield adapters from research | After research is complete, creating new adapters from scratch |
+| `fix-adapter` | sonnet | Diagnose and repair broken adapters | When adapters fail tests or return incorrect data |
+| `test-adapter` | haiku | Execute tests and generate quality reports | After building or fixing to verify correctness |
+| `discover-adapters` | haiku | Find protocols missing yield adapters | When looking for new protocols to add coverage |
+
+### Subagent Locations
+
+All subagent definitions are in `.claude/agents/`:
+- `.claude/agents/research-protocol.md`
+- `.claude/agents/build-adapter.md`
+- `.claude/agents/fix-adapter.md`
+- `.claude/agents/test-adapter.md`
+- `.claude/agents/discover-adapters.md`
+
+### Workflow Chains
+
+**New Adapter Pipeline:**
+```
+research-protocol → build-adapter → test-adapter → (fix-adapter if needed)
+```
+
+**Fix Existing Adapter:**
+```
+fix-adapter → (if deprecated: report and recommend removal)
+            → (if needs refactor: research-protocol → build-adapter)
+```
+
+**Discovery Pipeline:**
+```
+discover-adapters → user selects protocols → research-protocol (parallel)
+```
+
+### Cost Optimization
+
+- **haiku**: Fast/cheap tasks (testing, discovery)
+- **sonnet**: Reasoning tasks (research, debugging)
+- **opus**: Critical code generation (building adapters)
