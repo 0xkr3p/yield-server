@@ -98,12 +98,24 @@ Output saved to `.test-adapter-output/{protocol-name}.json`
 
 | Skill | Purpose |
 |-------|---------|
-| `.claude/skills/build-yield-adapter.md` | Full adapter creation workflow |
-| `.claude/skills/fix-yield-adapter.md` | Debug and fix broken adapters |
-| `.claude/skills/research-protocol.md` | Generic protocol research |
-| `.claude/skills/research-liquid-staking.md` | Liquid staking specifics |
-| `.claude/skills/research-lending.md` | Lending protocol specifics |
-| `.claude/skills/research-dex.md` | DEX/AMM specifics |
+| `building-yield-adapters` | Full adapter creation workflow |
+| `fixing-yield-adapters` | Debug and fix broken adapters |
+| `investigating-broken-data-sources` | Fix broken APIs, subgraphs, contracts |
+| `researching-protocols` | Generic protocol research |
+| `researching-liquid-staking` | Liquid staking specifics |
+| `researching-lending-protocols` | Lending protocol specifics |
+| `researching-dex-protocols` | DEX/AMM specifics |
+
+## Skill Improvement
+
+Log skill outcomes to `.claude/skills/SKILL-LOG.md` for weekly review:
+
+```
+# Quick log entry
+"Log: building-yield-adapters | silo-v2 | success | learned: need to handle isolated markets differently"
+```
+
+Weekly, review the log with Claude to identify patterns and improve skills.
 
 ## Common Patterns
 
