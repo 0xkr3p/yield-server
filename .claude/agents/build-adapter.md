@@ -12,6 +12,9 @@ tools:
 denied_tools:
   - WebFetch
   - WebSearch
+permissionMode: acceptEdits
+skills:
+  - investigating-broken-data-sources
 ---
 
 # Build Adapter Agent

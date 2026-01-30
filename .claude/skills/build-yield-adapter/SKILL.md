@@ -1,11 +1,17 @@
 ---
 name: building-yield-adapters
-description: Creates yield adapters for DeFi protocols on DefiLlama. Use when the user asks to create, build, or add a new yield adapter for a protocol.
+description: Creates yield adapters for DeFi protocols on DefiLlama. Use when the user asks to create, build, or add a new yield adapter for a protocol. Usage: /building-yield-adapters {protocol-slug}
 ---
 
-# Build Yield Adapter
+# Build Yield Adapter: $0
 
-Copy this checklist and track your progress:
+## Live Context
+
+Protocol info: !`curl -s "https://api.llama.fi/protocol/$0" 2>/dev/null | jq '{name, slug, category, chains, url}' 2>/dev/null || echo "Fetch protocol info manually"`
+
+Existing adapter check: !`ls -la src/adaptors/$0/ 2>/dev/null && echo "ADAPTER EXISTS" || echo "No existing adapter"`
+
+## Build Checklist
 
 ```
 Build Progress:
@@ -15,7 +21,7 @@ Build Progress:
 - [ ] Step 4: Find reference adapter
 - [ ] Step 5: Create adapter files
 - [ ] Step 6: Test adapter
-- [ ] Step 7: Fix any issues
+- [ ] Step 7: Validate against protocol UI
 - [ ] Step 8: Report summary to user
 ```
 
@@ -23,96 +29,60 @@ Build Progress:
 
 ### Step 1: Validate Protocol
 
+If live context above shows valid protocol info, proceed. If not:
 ```bash
-curl -s "https://api.llama.fi/protocol/{slug}" | jq '{name, slug, category, chains, url, github, module}'
+curl -s "https://api.llama.fi/protocol/$0" | jq '{name, slug, category, chains}'
 ```
 
-**If empty/error:** Check `https://api.llama.fi/protocols` for correct slug.
+### Step 2: Check No Existing Adapter
 
-**Save for later:** `category`, `chains`, `url`, `github`
-
-### Step 2: Check No Existing Yield Adapter
-
-```bash
-ls src/adaptors/{protocol-name}/ 2>/dev/null && echo "EXISTS" || echo "NOT FOUND"
-```
-
-**If exists:** Ask user if they want to update it instead.
+If live context shows "ADAPTER EXISTS", ask user if they want to update instead.
 
 ### Step 3: Research Protocol
 
-Run the research skill based on category:
+Run appropriate research skill based on category:
 
-| Category | Research Skill |
-|----------|----------------|
-| Liquid Staking | `.claude/skills/research-liquid-staking/SKILL.md` |
-| Lending, CDP | `.claude/skills/research-lending/SKILL.md` |
-| DEX, AMM | `.claude/skills/research-dex/SKILL.md` |
-| All others | `.claude/skills/research-protocol/SKILL.md` |
+| Category | Skill |
+|----------|-------|
+| Lending, CDP | `/researching-lending-protocols $0` |
+| Dexes, AMM | `/researching-dex-protocols $0` |
+| Liquid Staking | `/researching-liquid-staking $0` |
+| Other | `/researching-protocols $0` |
 
 **Research must produce:**
 - Data source (on-chain / subgraph / API)
 - Contract addresses per chain
 - APY calculation method
-- Token addresses (underlying, receipt, rewards)
-- Reference adapter to use as template
+- Reference adapter
 
-### Step 4: Find Reference Adapter
-
-Based on research, identify a similar working adapter:
+### Step 4: Create Adapter
 
 ```bash
-# List adapters in same category
-ls src/adaptors/ | xargs -I {} sh -c 'head -5 src/adaptors/{}/index.js 2>/dev/null | grep -l "{pattern}"'
-
-# Or check known good examples:
-# Liquid Staking: lido, marinade-finance, jito, rocket-pool
-# Lending: aave-v3, compound-v3, venus-core-pool
-# DEX: uniswap-v3, curve, velodrome
-# Yield: yearn-finance, beefy
+mkdir -p src/adaptors/$0
 ```
 
-Read the reference adapter to understand the pattern:
-```bash
-cat src/adaptors/{reference-adapter}/index.js
-```
-
-### Step 5: Create Adapter
-
-```bash
-mkdir -p src/adaptors/{protocol-name}
-```
-
-**Create `index.js` using this structure:**
-
+**Template:**
 ```javascript
 const utils = require('../utils');
 
-const PROJECT_NAME = '{protocol-name}'; // Must match folder name exactly
+const PROJECT_NAME = '$0'; // Must match folder name
 
 const main = async () => {
-  // 1. Fetch data using method from research
-  //    - On-chain: use sdk.api.abi.call/multiCall
-  //    - Subgraph: use graphql-request
-  //    - API: use utils.getData()
-
+  // 1. Fetch data (on-chain/subgraph/API)
   // 2. Get token prices if needed
-  //    const prices = await utils.getPrices(addresses, chain);
-
   // 3. Build pool objects
   const pools = data.map(item => ({
-    pool: `${item.address}-${chain}`.toLowerCase(), // Unique ID
+    pool: `${item.address}-${chain}`.toLowerCase(),
     chain: utils.formatChain(chain),
     project: PROJECT_NAME,
     symbol: utils.formatSymbol(item.symbol),
     tvlUsd: item.tvl,
-    apyBase: item.apy,                    // Base APY from fees/interest
-    // apyReward: item.rewardApy,         // Only if rewards exist
-    // rewardTokens: [item.rewardToken],  // Required if apyReward is set
+    apyBase: item.apy,
+    // apyReward: item.rewardApy,      // If rewards
+    // rewardTokens: [item.rewardToken], // Required if apyReward
     underlyingTokens: [item.tokenAddress],
   }));
 
-  // 4. Filter invalid pools
   return pools.filter(p => utils.keepFinite(p));
 };
 
@@ -124,36 +94,41 @@ module.exports = {
 ```
 
 **Key Rules:**
-- `project` must exactly match folder name
+- `project` must match folder name exactly
 - `pool` format: `${address}-${chain}`.toLowerCase()
 - Always use `utils.formatChain()` and `utils.formatSymbol()`
-- If `apyReward` is set, `rewardTokens` array is required
+- If `apyReward` set, `rewardTokens` required
 - Always filter with `utils.keepFinite()`
 
-### Step 6: Test
+### Step 5: Test
 
 ```bash
-cd src/adaptors && npm run test --adapter={protocol-name}
+cd src/adaptors && npm run test --adapter=$0
 ```
 
-**Check output in `.test-adapter-output/{protocol-name}.json`:**
-- Returns array with pools
-- All required fields present
-- APY values reasonable (typically 0-100%, max ~1000%)
-- TVL roughly matches DefiLlama protocol TVL
+Check output:
+```bash
+cat src/adaptors/.test-adapter-output/$0.json | jq 'length'
+cat src/adaptors/.test-adapter-output/$0.json | jq '[.[].tvlUsd] | add'
+```
 
-### Step 7: Fix Issues
+### Step 6: Fix Issues
 
 | Error | Fix |
 |-------|-----|
 | "pool is required" | Check pool ID format |
-| "apyReward requires rewardTokens" | Add rewardTokens array or remove apyReward |
-| APY is NaN/Infinity | Guard against division by zero |
-| Empty array | Check API response, add console.log debugging |
-| Timeout | Add retry logic or check RPC endpoint |
-| "project doesn't match" | Ensure PROJECT_NAME matches folder name |
+| "apyReward requires rewardTokens" | Add rewardTokens or remove apyReward |
+| APY is NaN/Infinity | Guard division by zero |
+| Empty array | Debug data source |
 
-Re-run test after each fix until passing.
+### Step 7: Validate Against UI
+
+**CRITICAL:** Use validate-adapter agent:
+```
+@validate-adapter $0
+```
+
+Or manually compare output to protocol UI values.
 
 ### Step 8: Summary
 
@@ -161,40 +136,27 @@ Report to user:
 - Pools found: {count}
 - TVL covered: ${total}
 - APY range: {min}% - {max}%
-- Any limitations or notes
+- Any notes
 
----
+## Merkl Rewards Integration
 
-## Learnings & Best Practices
+If protocol uses Merkl for rewards:
 
-### Reward Tokens from Merkl API
-
-Many protocols distribute rewards via Merkl. Instead of hardcoding reward tokens, query them from the Merkl API helper:
-
-**Option 1: Use the built-in helper function**
 ```javascript
 const { addMerklRewardApy } = require('../merkl/merkl-additional-reward');
 
 const main = async () => {
-  let pools = await fetchBasePools(); // Your base pool logic
-
-  // Augment with Merkl reward data (protocolId from merkl.xyz)
+  let pools = await fetchBasePools();
   pools = await addMerklRewardApy(pools, 'protocol-id', (pool) => pool.pool.split('-')[0]);
-
   return pools;
 };
 ```
 
-**Option 2: Query Merkl API directly**
-```javascript
-// Get opportunities for a specific protocol
-const merklData = await utils.getData(
-  `https://api.merkl.xyz/v4/opportunities?mainProtocolId=${protocolId}&status=LIVE&items=100`
-);
+## Reference Adapters
 
-// Extract reward tokens from response
-const rewardTokens = merklData[0]?.rewardsRecord?.breakdowns.map(x => x.token.address) || [];
-const apyReward = merklData[0]?.apr || 0;
-```
-
-**When to use:** If the protocol has Merkl integrations (check their UI for "Merkl rewards" badges or visit `app.merkl.xyz`).
+| Category | Examples |
+|----------|----------|
+| Liquid Staking | `lido`, `marinade-finance`, `jito` |
+| Lending | `aave-v3`, `compound-v3`, `venus-core-pool` |
+| DEX | `uniswap-v3`, `curve`, `velodrome-v2` |
+| Yield | `yearn-finance`, `beefy` |

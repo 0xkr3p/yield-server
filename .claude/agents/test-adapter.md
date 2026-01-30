@@ -12,6 +12,7 @@ denied_tools:
   - WebFetch
   - WebSearch
   - Glob
+permissionMode: bypassPermissions
 ---
 
 # Test Adapter Agent

@@ -12,6 +12,7 @@ tools:
 denied_tools:
   - Write
   - Edit
+permissionMode: bypassPermissions
 ---
 
 # Research Protocol Agent

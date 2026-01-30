@@ -12,6 +12,7 @@ denied_tools:
   - Write
   - Edit
   - WebSearch
+permissionMode: bypassPermissions
 ---
 
 # Discover Adapters Agent

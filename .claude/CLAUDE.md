@@ -140,6 +140,8 @@ Custom subagents are available for specialized yield adapter workflows. These sh
 | `build-adapter` | opus | Create complete yield adapters from research | After research is complete, creating new adapters from scratch |
 | `fix-adapter` | sonnet | Diagnose and repair broken adapters | When adapters fail tests or return incorrect data |
 | `test-adapter` | haiku | Execute tests and generate quality reports | After building or fixing to verify correctness |
+| `validate-adapter` | sonnet | Validate adapter output against protocol UI | **After any build/fix** to ensure data accuracy |
+| `compare-adapters` | haiku | Compare two adapter outputs | When debugging or migrating adapters |
 | `discover-adapters` | haiku | Find protocols missing yield adapters | When looking for new protocols to add coverage |
 
 ### Subagent Locations
@@ -149,25 +151,33 @@ All subagent definitions are in `.claude/agents/`:
 - `.claude/agents/build-adapter.md`
 - `.claude/agents/fix-adapter.md`
 - `.claude/agents/test-adapter.md`
+- `.claude/agents/validate-adapter.md` (NEW)
+- `.claude/agents/compare-adapters.md` (NEW)
 - `.claude/agents/discover-adapters.md`
 
 ### Workflow Chains
 
 **New Adapter Pipeline:**
 ```
-research-protocol → build-adapter → test-adapter → (fix-adapter if needed)
+research-protocol → build-adapter → test-adapter → validate-adapter
+                                                   ↓
+                                            (fix-adapter if validation fails)
 ```
 
 **Fix Existing Adapter:**
 ```
-fix-adapter → (if deprecated: report and recommend removal)
-            → (if needs refactor: research-protocol → build-adapter)
+fix-adapter → test-adapter → validate-adapter
+           ↓
+    (if deprecated: report and recommend removal)
+    (if needs refactor: research-protocol → build-adapter)
 ```
 
 **Discovery Pipeline:**
 ```
 discover-adapters → user selects protocols → research-protocol (parallel)
 ```
+
+**IMPORTANT:** Always run `validate-adapter` after `test-adapter` - passing tests only verify format, not data accuracy.
 
 ### Cost Optimization
 

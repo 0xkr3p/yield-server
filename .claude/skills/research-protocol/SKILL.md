@@ -1,238 +1,105 @@
 ---
 name: researching-protocols
-description: Researches DeFi protocols for yield adapter development. Use as a general-purpose research skill when the protocol category is unknown or doesn't fit lending, DEX, or liquid staking patterns.
+description: Researches DeFi protocols for yield adapter development. Use as a general-purpose research skill when the protocol category is unknown or doesn't fit lending, DEX, or liquid staking patterns. Usage: /researching-protocols {protocol-slug}
 ---
 
-# Research Protocol
+# Research Protocol: $0
 
-Copy this checklist and track your progress:
+## Live Context
+
+Protocol info: !`curl -s "https://api.llama.fi/protocol/$0" 2>/dev/null | jq '{name, slug, category, chains, url, github}' 2>/dev/null || echo "Fetch protocol info manually"`
+
+TVL adapter preview: !`curl -s "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/main/projects/$0/index.js" 2>/dev/null | head -30 || echo "No TVL adapter found"`
+
+## Research Checklist
 
 ```
 Research Progress:
-- [ ] Phase 1: DefiLlama Protocol Info
-- [ ] Phase 2: Existing TVL Adapter
-- [ ] Phase 3: Protocol Website & Documentation
-- [ ] Phase 4: Protocol GitHub Research
-- [ ] Phase 5: Subgraph Discovery
-- [ ] Phase 6: Contract Verification (EVM)
-- [ ] Phase 7: Solana Account Data (if Solana)
-- [ ] Phase 8: API Endpoint Discovery
-- [ ] Phase 9: Price Data
-- [ ] Phase 10: Reference Similar Adapters
+- [ ] Phase 1: Review protocol info above
+- [ ] Phase 2: Identify category and route to specialized skill
+- [ ] Phase 3: Find data sources (subgraph/API/on-chain)
+- [ ] Phase 4: Get contract addresses
+- [ ] Phase 5: Understand APY calculation
+- [ ] Phase 6: Find reference adapter
 ```
+
+## Routing by Category
+
+Based on the category from DefiLlama:
+
+| Category | Route to Skill |
+|----------|----------------|
+| Lending, CDP | `.claude/skills/research-lending/SKILL.md` |
+| Dexes, Liquidity Manager | `.claude/skills/research-dex/SKILL.md` |
+| Liquid Staking | `.claude/skills/research-liquid-staking/SKILL.md` |
+| Other | Continue with this skill |
 
 ## Research Phases
 
-### Phase 1: DefiLlama Protocol Info
+### Phase 1: Protocol Info Analysis
 
-```bash
-curl -s "https://api.llama.fi/protocol/{slug}" | jq '{
-  name,
-  slug, 
-  category,
-  chains,
-  url,
-  twitter,
-  github,
-  module
-}'
-```
+From the live context above, extract:
+- **Category** → Determines adapter pattern
+- **Chains** → Which chains to support
+- **URL** → Protocol website for docs
+- **GitHub** → Source for contracts/subgraph
 
-**Extract and save:**
-- `category` → Determines adapter pattern
-- `chains` → Which chains to support
-- `url` → Protocol website (for Phase 3)
-- `github` → GitHub org/repos (for Phase 4)
-- `module` → TVL adapter path (has contract addresses!)
+### Phase 2: TVL Adapter Mining
 
-### Phase 2: Existing TVL Adapter (Gold Mine!)
-
-```bash
-# Get the TVL adapter - often contains contract addresses
-curl -s "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/main/projects/{slug}/index.js"
-```
-
-**Look for:**
+The TVL adapter (if exists) often contains:
 - Contract addresses
-- Chain configurations  
-- RPC call patterns
-- Helper imports (may indicate data source)
+- Chain configurations
+- RPC patterns
 
-### Phase 3: Protocol Website & Documentation
-
-**3a. Documentation Locations to Check:**
-
-Try fetching documentation directly:
 ```bash
-# Common documentation URLs
-curl -s "https://docs.{protocol}.com/" 
-curl -s "https://{protocol}.gitbook.io/"
-curl -s "https://docs.{protocol}.finance/"
-curl -s "https://{protocol}.readme.io/"
-curl -s "{protocol-url}/docs"
+curl -s "https://raw.githubusercontent.com/DefiLlama/DefiLlama-Adapters/main/projects/$0/index.js"
 ```
 
-**3b. What to Search For in Documentation:**
-- "contract" or "address" → Deployment addresses
-- "API" → REST API endpoints  
-- "subgraph" or "graph" → GraphQL endpoints
-- "integration" or "SDK" → Developer tools
-- "fee" or "rates" → Fee structure for APY calculation
-- "architecture" → How the protocol works
+### Phase 3: Data Source Discovery
 
-**3c. Developer/Integration Resources:**
-- Developer portals often at: `developers.{protocol}.com` or `{protocol}.com/developers`
-- API documentation with endpoints and auth requirements
-- Rate limits and usage guidelines
-
-### Phase 4: Protocol GitHub Research
-
-If `github` field exists from Phase 1:
+**Priority order:**
+1. On-chain (most reliable)
+2. Subgraph (good for aggregated data)
+3. API (last resort)
 
 ```bash
-# Get repo contents listing
-curl -s "https://api.github.com/repos/{org}/{repo}/contents/" | jq '.[].name'
-
-# Check README for addresses and architecture
-curl -s "https://raw.githubusercontent.com/{org}/{repo}/main/README.md"
-```
-
-**4a. Look for deployment/address files:**
-```bash
-# Common locations for contract addresses
-curl -s "https://raw.githubusercontent.com/{org}/{repo}/main/deployments.json"
-curl -s "https://raw.githubusercontent.com/{org}/{repo}/main/addresses.json"
-curl -s "https://api.github.com/repos/{org}/{repo}/contents/deployments" | jq '.[].name'
-curl -s "https://api.github.com/repos/{org}/{repo}/contents/contracts" | jq '.[].name'
-```
-
-**4b. Look for subgraph:**
-```bash
-# Check for subgraph directory
-curl -s "https://api.github.com/repos/{org}/{repo}/contents/subgraph" | jq '.[].name'
-curl -s "https://raw.githubusercontent.com/{org}/{repo}/main/subgraph/subgraph.yaml"
-
-# Or search for subgraph.yaml
-curl -s "https://api.github.com/search/code?q=subgraph.yaml+repo:{org}/{repo}"
-```
-
-**4c. Look for SDK/API client:**
-```bash
-# Check package.json for hints
-curl -s "https://raw.githubusercontent.com/{org}/{repo}/main/package.json" | jq '.dependencies'
-
-# Look for SDK or API folders
-curl -s "https://api.github.com/repos/{org}/{repo}/contents/sdk" | jq '.[].name'
-curl -s "https://api.github.com/repos/{org}/{repo}/contents/api" | jq '.[].name'
-```
-
-### Phase 5: Subgraph Discovery
-
-```bash
-# Try common subgraph naming patterns on The Graph
-curl -s "https://api.thegraph.com/subgraphs/name/{org}/{protocol}" \
+# Test subgraph
+curl -s "https://api.thegraph.com/subgraphs/name/{org}/$0" \
   -H "Content-Type: application/json" \
   -d '{"query": "{ _meta { block { number } } }"}'
 
-# Try with chain suffix
-curl -s "https://api.thegraph.com/subgraphs/name/{org}/{protocol}-{chain}" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "{ _meta { block { number } } }"}'
-
-# Check Graph Explorer
-# Use browser if needed: https://thegraph.com/explorer?search={protocol}
-```
-
-**If subgraph found, explore schema:**
-```graphql
-{
-  __schema {
-    types {
-      name
-      fields { name }
-    }
-  }
-}
-```
-
-### Phase 6: Contract Verification (EVM Chains)
-
-For each contract address found:
-
-```bash
-# Etherscan API (works for most EVM chains with different base URLs)
-curl -s "https://api.etherscan.io/api?module=contract&action=getabi&address={address}"
-
-# Get contract source to understand functions
-curl -s "https://api.etherscan.io/api?module=contract&action=getsourcecode&address={address}"
-```
-
-**Explorer API endpoints:**
-| Chain | API Base |
-|-------|----------|
-| Ethereum | api.etherscan.io |
-| Polygon | api.polygonscan.com |
-| Arbitrum | api.arbiscan.io |
-| Optimism | api-optimistic.etherscan.io |
-| BSC | api.bscscan.com |
-| Avalanche | api.snowtrace.io |
-| Base | api.basescan.org |
-
-### Phase 7: Solana Account Data
-
-For Solana protocols:
-
-```bash
-# Get account info
-curl -s https://api.mainnet-beta.solana.com -X POST \
-  -H "Content-Type: application/json" \
-  -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "getAccountInfo",
-    "params": ["{address}", {"encoding": "jsonParsed"}]
-  }'
-```
-
-**Check account owner to identify program type:**
-- `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA` → Token account
-- `SPoo1Ku8WFXoNDMHPsrGSTSG1Y47rzgn41SLUNakuHy` → Stake Pool
-- Custom → Protocol-specific program
-
-### Phase 8: API Endpoint Discovery
-
-If protocol has an API (found in docs or GitHub):
-
-```bash
 # Test common API patterns
-curl -s "https://api.{protocol}.com/v1/pools"
-curl -s "https://api.{protocol}.io/stats"
-curl -s "https://{protocol}.com/api/yields"
-curl -s "https://api.{protocol}.finance/apy"
+curl -s "https://api.$0.com/v1/pools" 2>/dev/null | head -50
 ```
 
-### Phase 9: Price Data
+### Phase 4: Contract Discovery
 
 ```bash
-# Get token prices for TVL calculation
-curl -s "https://coins.llama.fi/prices/current/{chain}:{address},{chain}:{address2}"
+# Check for deployment files in GitHub
+curl -s "https://raw.githubusercontent.com/{org}/$0/main/deployments.json" 2>/dev/null
+curl -s "https://raw.githubusercontent.com/{org}/$0/main/addresses.json" 2>/dev/null
+
+# Verify contract on Etherscan
+curl -s "https://api.etherscan.io/api?module=contract&action=getabi&address={address}"
 ```
 
-### Phase 10: Reference Similar Adapters
+### Phase 5: APY Calculation Research
 
-Look at adapters in the same category for patterns:
+Look for:
+- Fee structure (protocol docs)
+- Interest rate models (lending)
+- Trading fees (DEX)
+- Staking rewards (liquid staking)
+
+### Phase 6: Reference Adapter
 
 ```bash
-# List adapters
-ls src/adaptors/ | head -50
-
-# Find similar by examining a known one in same category
-cat src/adaptors/{similar-protocol}/index.js
+# Find similar adapters
+ls src/adaptors/ | head -30
+cat src/adaptors/{similar}/index.js
 ```
 
 ## Output Format
-
-After research, compile findings:
 
 ```markdown
 ## Research Results: {Protocol Name}
@@ -242,79 +109,37 @@ After research, compile findings:
 - Category: {category}
 - Chains: {chains}
 - Website: {url}
-- GitHub: {github}
 
 ### Data Source Recommendation
 - Primary: {on-chain | subgraph | api}
-- Reason: {why this source}
-- Fallback: {alternative if primary fails}
+- Reason: {why}
+- Fallback: {alternative}
 
 ### Contracts Found
-| Chain | Name | Address | Verified | Source |
-|-------|------|---------|----------|--------|
-| | | | | (docs/github/explorer) |
-
-### Subgraph
-- Available: Yes/No
-- Endpoint: {url}
-- Status: {synced/behind/error}
-- Key Entities: {pools, markets, vaults, etc.}
-
-### API Endpoints
-| Endpoint | Method | Purpose | Auth Required |
-|----------|--------|---------|---------------|
-| | | | |
-
-### Key Functions (On-Chain)
-| Contract | Function | Returns | Purpose |
-|----------|----------|---------|---------|
-| | | | |
+| Chain | Name | Address |
+|-------|------|---------|
 
 ### APY Calculation
 - Method: {description}
 - Formula: {formula}
-- Data needed: {what to fetch}
-
-### Fee Structure
-- Protocol fee: {x%}
-- Other fees: {details}
 
 ### Tokens
-- Underlying: {symbols and addresses}
+- Underlying: {list}
 - Receipt/LP: {if applicable}
 - Rewards: {if applicable}
 
-### Reference Adapters
-Similar adapters to use as template:
-- src/adaptors/{name}/ - {why similar}
+### Reference Adapter
+- `src/adaptors/{name}/` - {why similar}
 
-### Notes & Considerations
-- {any issues, edge cases, or special considerations}
-- {rate limits, auth requirements}
-- {missing information that needs manual research}
+### Notes
+- {edge cases, rate limits, etc.}
 ```
 
-## Research Checklist
+## Completion Checklist
 
-Before completing research, ensure you have:
-- [ ] Protocol category identified
-- [ ] All supported chains listed
-- [ ] At least one data source (on-chain/subgraph/API)
-- [ ] Contract addresses for each chain
-- [ ] Method to calculate APY
-- [ ] Fee structure understood
-- [ ] Token addresses (underlying, receipt, rewards)
-- [ ] Similar adapter identified for reference
-
-## Fallback: Browser Research
-
-If HTTP research is insufficient (rare), invoke Claude in Chrome:
-
-```
-mcp__claude_in_chrome__navigate({url: "{protocol-docs-url}"})
-```
-
-Only use browser for:
-- JavaScript-rendered documentation
-- Complex interactive docs
-- When HTTP endpoints return nothing useful
+- [ ] Category identified
+- [ ] Data source found (on-chain/subgraph/API)
+- [ ] Contract addresses per chain
+- [ ] APY calculation method
+- [ ] Token addresses
+- [ ] Reference adapter identified
