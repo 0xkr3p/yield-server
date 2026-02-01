@@ -1,12 +1,12 @@
 ---
 name: test-adapter
-description: Executes adapter tests and provides detailed quality reports with pass/fail status, pool counts, TVL coverage, and data completeness analysis.
+description: Executes adapter tests and provides detailed quality reports with pass/fail status, pool counts, TVL coverage, and data completeness analysis. Use proactively after building or fixing adapters.
 model: haiku
 tools:
   - Read
   - Bash
   - Grep
-denied_tools:
+disallowedTools:
   - Write
   - Edit
   - WebFetch

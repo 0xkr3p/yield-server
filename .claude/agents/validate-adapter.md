@@ -1,6 +1,6 @@
 ---
 name: validate-adapter
-description: Validates adapter output against protocol UI using Playwright for JS-rendered pages. Use after building or fixing adapters.
+description: Validates adapter output against protocol UI using Playwright for JS-rendered pages. Use proactively after building or fixing adapters to ensure data accuracy.
 model: sonnet
 tools:
   - Read
@@ -12,7 +12,7 @@ tools:
   - mcp__playwright__browser_click
   - mcp__playwright__browser_wait
   - mcp__playwright__browser_network_requests
-denied_tools:
+disallowedTools:
   - Write
   - Edit
   - WebSearch

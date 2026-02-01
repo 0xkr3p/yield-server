@@ -1,6 +1,6 @@
 ---
 name: discover-adapters
-description: Finds protocols that need yield adapters by comparing DefiLlama data against existing adapters. Produces prioritized lists with difficulty assessments.
+description: Finds protocols that need yield adapters by comparing DefiLlama data against existing adapters. Produces prioritized lists with difficulty assessments. Use to find new protocols to add.
 model: haiku
 tools:
   - Read
@@ -8,7 +8,7 @@ tools:
   - Grep
   - Glob
   - WebFetch
-denied_tools:
+disallowedTools:
   - Write
   - Edit
   - WebSearch

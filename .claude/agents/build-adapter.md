@@ -1,6 +1,6 @@
 ---
 name: build-adapter
-description: Creates complete, working yield adapters from research output. Handles code generation, file creation, and initial testing.
+description: Creates complete, working yield adapters from research output. Handles code generation, file creation, and initial testing. Use after research is complete.
 model: opus
 tools:
   - Read
@@ -9,12 +9,10 @@ tools:
   - Bash
   - Write
   - Edit
-denied_tools:
+disallowedTools:
   - WebFetch
   - WebSearch
 permissionMode: acceptEdits
-skills:
-  - investigating-broken-data-sources
 ---
 
 # Build Adapter Agent

@@ -1,6 +1,6 @@
 ---
 name: fix-adapter
-description: Diagnoses and repairs broken yield adapters through iterative debugging. Includes deprecation detection and data source investigation.
+description: Diagnoses and repairs broken yield adapters through iterative debugging. Includes deprecation detection and data source investigation. Use proactively when adapters fail tests or return incorrect data.
 model: sonnet
 tools:
   - Read
@@ -10,11 +10,9 @@ tools:
   - Write
   - Edit
   - WebFetch
-denied_tools:
+disallowedTools:
   - WebSearch
 permissionMode: acceptEdits
-skills:
-  - investigating-broken-data-sources
 ---
 
 # Fix Adapter Agent

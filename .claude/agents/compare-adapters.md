@@ -6,7 +6,7 @@ tools:
   - Read
   - Bash
   - Grep
-denied_tools:
+disallowedTools:
   - Write
   - Edit
   - WebFetch

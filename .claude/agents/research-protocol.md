@@ -1,6 +1,6 @@
 ---
 name: research-protocol
-description: Researches DeFi protocols for yield adapter development. Gathers technical details including contracts, data sources, and APY calculation methods.
+description: Researches DeFi protocols for yield adapter development. Gathers technical details including contracts, data sources, and APY calculation methods. Use proactively before building new adapters.
 model: sonnet
 tools:
   - Read
@@ -15,7 +15,7 @@ tools:
   - mcp__playwright__browser_network_requests
   - mcp__playwright__browser_wait
   - mcp__playwright__browser_click
-denied_tools:
+disallowedTools:
   - Write
   - Edit
 permissionMode: bypassPermissions
