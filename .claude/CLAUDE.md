@@ -104,6 +104,7 @@ Output saved to `.test-adapter-output/{protocol-name}.json`
 | `building-yield-adapters` | Full adapter creation workflow |
 | `fixing-yield-adapters` | Debug and fix broken adapters |
 | `investigating-broken-data-sources` | Fix broken APIs, subgraphs, contracts |
+| `add-merkl-rewards` | Add Merkl token rewards to adapters |
 | `researching-protocols` | Generic protocol research |
 | `researching-liquid-staking` | Liquid staking specifics |
 | `researching-lending-protocols` | Lending protocol specifics |

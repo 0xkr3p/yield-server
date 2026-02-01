@@ -140,17 +140,26 @@ Report to user:
 
 ## Merkl Rewards Integration
 
-If protocol uses Merkl for rewards:
+Many protocols distribute token rewards via Merkl. For full integration details, see:
 
-```javascript
-const { addMerklRewardApy } = require('../merkl/merkl-additional-reward');
+**`/add-merkl-rewards $0`**
 
-const main = async () => {
-  let pools = await fetchBasePools();
-  pools = await addMerklRewardApy(pools, 'protocol-id', (pool) => pool.pool.split('-')[0]);
-  return pools;
-};
+### Quick Check
+
+```bash
+# Check if protocol has Merkl rewards
+curl -s "https://api.merkl.xyz/v4/protocols" | jq '.[] | select(.name | test("$0"; "i"))'
 ```
+
+### Integration Patterns
+
+| Scenario | Approach |
+|----------|----------|
+| Protocol has `mainProtocolId` | Use `addMerklRewardApy()` helper |
+| No `mainProtocolId` but vaults in Merkl | Custom query by vault address |
+| No Merkl presence | Skip rewards integration |
+
+See `/add-merkl-rewards` skill for complete implementation patterns and code examples.
 
 ## Reference Adapters
 
