@@ -245,6 +245,51 @@ Compare against protocol website:
 | Empty array | Data source issue, check API/subgraph |
 | Timeout | Rate limiting, add delays/retries |
 
+## APY Validation Rules
+
+**CRITICAL**: `apyBase = 0` is usually a bug. Always verify APY values against the protocol UI.
+
+### When apyBase = 0 is a BUG (fix required)
+
+| Protocol Type | Expected APY Field | Why 0 is Wrong |
+|---------------|-------------------|----------------|
+| **Lending (supply side)** | `apyBase > 0` | Lenders always earn interest |
+| **Liquid Staking** | `apyBase > 0` | Validators always generate rewards |
+| **DEX/AMM LP** | `apyBase > 0` OR `apyReward > 0` | Fees or incentives must exist |
+| **Yield Aggregator** | `apyBase > 0` | Strategies always have yield |
+
+### When apyBase = 0 is VALID
+
+| Scenario | Required Fields | Example |
+|----------|-----------------|---------|
+| **Reward-only pool** | `apyReward > 0` + `rewardTokens` | Staking incentive programs |
+| **Borrow-only pool** | `apyBaseBorrow > 0` | CDP collateral vaults |
+| **Treasury/non-yield** | Document in `poolMeta` | Treasury management vaults |
+
+### APY Validation Decision Tree
+
+```
+IF apyBase = 0:
+  IF apyReward > 0 AND rewardTokens exists:
+    ✓ VALID (reward-only pool)
+  ELSE IF apyBaseBorrow > 0:
+    ✓ VALID (borrow-only pool)
+  ELSE IF tvlUsd > 0 AND protocol generates yield:
+    ✗ BUG - investigate data source
+  ELSE:
+    ⚠ WARNING - verify with protocol UI
+```
+
+### Common APY = 0 Bugs and Fixes
+
+| Root Cause | Symptom | Fix |
+|------------|---------|-----|
+| Broken subgraph | APY field returns null/0 | Migrate to working endpoint (Goldsky, on-chain) |
+| Wrong decimal conversion | APY shows 0.0001 instead of 10% | Check if APY is already percentage vs decimal |
+| Missing price data | APY calculation returns 0 | Add fallback prices or skip pool |
+| Stale data source | APY was correct historically | Find new API version or on-chain method |
+| Wrong field name | Querying `apy` but field is `estimatedApy` | Check data source schema |
+
 ## Data Source Investigation
 
 If the data source itself is broken, investigate alternatives:
@@ -259,3 +304,31 @@ If the data source itself is broken, investigate alternatives:
 2. Validate output matches protocol UI
 3. Remove any debug logging
 4. Report summary of changes made
+5. **Log learnings automatically**
+
+### Step 11: Log Learnings (Required)
+
+After completing any fix, log what you learned:
+
+```bash
+.claude/hooks/log-learning.sh "{protocol}" "fix-adapter" "{success|partial|failed}" "{what you learned}" "{tags}"
+```
+
+**Examples:**
+```bash
+# Successful fix - subgraph migration
+.claude/hooks/log-learning.sh "curve" "fix-adapter" "success" "Subgraph moved to decentralized network, updated endpoint" "subgraph-migration,endpoint-update"
+
+# Successful fix - calculation error
+.claude/hooks/log-learning.sh "aave-v3" "fix-adapter" "success" "RAY format requires division by 1e27 for APY" "decimal-fix,lending,aave-fork"
+
+# Partial fix - some chains still broken
+.claude/hooks/log-learning.sh "uniswap-v3" "fix-adapter" "partial" "Fixed ethereum but arbitrum subgraph still syncing" "subgraph-sync,multi-chain"
+
+# Failed - protocol deprecated
+.claude/hooks/log-learning.sh "old-protocol" "fix-adapter" "failed" "Protocol shut down, TVL is 0, recommend removal" "deprecation"
+```
+
+**Common tags:** `endpoint-update`, `subgraph-migration`, `decimal-fix`, `validation-fix`, `deprecation`, `api-change`, `contract-upgrade`, `lending`, `dex`, `liquid-staking`
+
+This logs to `.claude/feedback/entries/` for weekly review.

@@ -184,3 +184,89 @@ discover-adapters → user selects protocols → research-protocol (parallel)
 - **haiku**: Fast/cheap tasks (testing, discovery)
 - **sonnet**: Reasoning tasks (research, debugging)
 - **opus**: Critical code generation (building adapters)
+
+## Feedback System
+
+A structured feedback system captures outcomes from agent and skill executions to enable continuous improvement.
+
+### Feedback Directory Structure
+
+```
+.claude/feedback/
+├── schema.md                    # Feedback entry format
+├── entries/                     # JSON feedback per execution
+├── patterns/                    # Known patterns library
+│   ├── error-patterns.md        # Common errors → fixes
+│   └── data-source-patterns.md  # Migration patterns
+├── weekly/                      # Weekly summaries
+└── REVIEW-WORKFLOW.md           # Review process
+```
+
+### Quick Feedback Logging
+
+After any significant work, log the outcome:
+
+```
+Log: {agent/skill} | {protocol} | {success/partial/failed} | {learning}
+```
+
+Example:
+```
+Log: build-adapter | morpho-blue | success | isolated markets need separate pool IDs
+```
+
+### Automated Feedback Capture
+
+Feedback is automatically captured via hooks after:
+- Adapter tests (pool count, TVL, APY metrics)
+- Validation runs (variance data)
+
+Feedback entries are saved to `.claude/feedback/entries/YYYY-MM-DD-{protocol}.json`
+
+### Weekly Review
+
+Run weekly to identify patterns and improve skills:
+
+```bash
+claude "Run weekly feedback review"
+```
+
+See `.claude/feedback/REVIEW-WORKFLOW.md` for the full process.
+
+### Pattern Library
+
+Before debugging, check known patterns:
+- `.claude/feedback/patterns/error-patterns.md` - Common errors with fixes
+- `.claude/feedback/patterns/data-source-patterns.md` - Migration patterns
+
+## MCP Integration (Optional)
+
+MCP (Model Context Protocol) servers can enhance data fetching accuracy. Configuration is in `.claude/mcp.json`.
+
+### Available MCP Servers
+
+| Server | Purpose | Priority |
+|--------|---------|----------|
+| `etherscan` | Fetch contract ABIs, verify contracts | High |
+| `subgraph` | Query 15,000+ subgraphs with schema inspection | High |
+| `github` | Access TVL adapters and reference code | Medium |
+| `evm` | Multi-chain EVM interactions (30+ chains) | Medium |
+| `solana` | Solana blockchain and SPL token queries | Low |
+
+### Setup
+
+1. Copy `.claude/mcp.json` to your Claude Code MCP configuration
+2. Set required environment variables:
+   - `ETHERSCAN_API_KEY` - Get from https://etherscan.io/apis
+   - `GRAPH_API_KEY` - Get from https://thegraph.com/studio/apikeys/
+   - `GITHUB_TOKEN` - Generate at https://github.com/settings/tokens
+
+### Benefits
+
+- **Etherscan MCP**: Replaces manual `curl` for ABI fetching
+- **Subgraph MCP**: Automatic schema discovery, better error handling
+- **GitHub MCP**: Structured access to TVL adapters
+
+## Usage Guide
+
+For comprehensive usage examples and scenarios, see `.claude/USAGE-GUIDE.md`.

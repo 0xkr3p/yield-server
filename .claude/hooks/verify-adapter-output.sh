@@ -1,14 +1,32 @@
 #!/bin/bash
 # Verification hook for adapter test output
 # Runs after adapter tests to check for common issues
+# Works when running from root or src/adaptors directory
+
+# Determine the repository root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Get adapter name from the test command or argument
 ADAPTER="${1:-}"
 
-# If no adapter specified, try to extract from recent test output
+# Try to find the test output directory (works from root or src/adaptors)
+# When running from root: output goes to ./.test-adapter-output/
+# When running from src/adaptors: output goes to ./.test-adapter-output/
+if [ -d "$REPO_ROOT/.test-adapter-output" ]; then
+  OUTPUT_DIR="$REPO_ROOT/.test-adapter-output"
+elif [ -d "$REPO_ROOT/src/adaptors/.test-adapter-output" ]; then
+  OUTPUT_DIR="$REPO_ROOT/src/adaptors/.test-adapter-output"
+elif [ -d ".test-adapter-output" ]; then
+  OUTPUT_DIR=".test-adapter-output"
+else
+  echo "SKIP: No test output directory found"
+  exit 0
+fi
+
+# If no adapter specified, try to find most recently modified output file
 if [ -z "$ADAPTER" ]; then
-  # Find most recently modified output file
-  ADAPTER=$(ls -t src/adaptors/.test-adapter-output/*.json 2>/dev/null | head -1 | xargs -I {} basename {} .json)
+  ADAPTER=$(ls -t "$OUTPUT_DIR"/*.json 2>/dev/null | head -1 | xargs -I {} basename {} .json)
 fi
 
 if [ -z "$ADAPTER" ]; then
@@ -16,12 +34,24 @@ if [ -z "$ADAPTER" ]; then
   exit 0
 fi
 
-OUTPUT_FILE="src/adaptors/.test-adapter-output/${ADAPTER}.json"
+OUTPUT_FILE="$OUTPUT_DIR/${ADAPTER}.json"
 
 # Check if output file exists
 if [ ! -f "$OUTPUT_FILE" ]; then
   echo "ERROR: No output file found at $OUTPUT_FILE"
   exit 1
+fi
+
+# Skip if file is older than 60 seconds (not from current test run)
+if [ "$(uname)" = "Darwin" ]; then
+  FILE_AGE=$(( $(date +%s) - $(stat -f %m "$OUTPUT_FILE") ))
+else
+  FILE_AGE=$(( $(date +%s) - $(stat -c %Y "$OUTPUT_FILE") ))
+fi
+
+# Skip if file is older than 5 minutes (not from recent test run)
+if [ "$FILE_AGE" -gt 300 ]; then
+  exit 0
 fi
 
 echo "Verifying adapter: $ADAPTER"
@@ -65,6 +95,26 @@ fi
 NEG_APY_COUNT=$(jq '[.[] | select((.apyBase // 0) < 0 or (.apyReward // 0) < 0)] | length' "$OUTPUT_FILE" 2>/dev/null)
 if [ "$NEG_APY_COUNT" -gt 0 ]; then
   echo "WARNING: $NEG_APY_COUNT pools have negative APY"
+fi
+
+# Check for apyBase = 0 without valid alternatives (potential bug)
+# Valid cases: apyReward > 0, apyBaseBorrow > 0, or apy field exists
+ZERO_APY_BUG_COUNT=$(jq '[.[] | select(
+  (.apyBase == 0 or .apyBase == null) and
+  (.apyReward == 0 or .apyReward == null) and
+  (.apy == 0 or .apy == null) and
+  (.apyBaseBorrow == 0 or .apyBaseBorrow == null) and
+  (.tvlUsd > 1000)
+)] | length' "$OUTPUT_FILE" 2>/dev/null)
+if [ "$ZERO_APY_BUG_COUNT" -gt 0 ]; then
+  echo "WARNING: $ZERO_APY_BUG_COUNT pools have APY = 0 with TVL > \$1000 (likely bug)"
+  echo "  Pools with zero APY:"
+  jq -r '[.[] | select(
+    (.apyBase == 0 or .apyBase == null) and
+    (.apyReward == 0 or .apyReward == null) and
+    (.apy == 0 or .apy == null) and
+    (.tvlUsd > 1000)
+  )] | .[0:3] | .[] | "    - \(.symbol): TVL $\(.tvlUsd | floor)"' "$OUTPUT_FILE" 2>/dev/null
 fi
 
 # Check for missing rewardTokens when apyReward > 0

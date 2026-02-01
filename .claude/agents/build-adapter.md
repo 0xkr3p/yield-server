@@ -113,6 +113,7 @@ module.exports = {
 3. **Always use** `utils.formatChain()` and `utils.formatSymbol()`
 4. **If `apyReward` is set**, `rewardTokens` array is required
 5. **Always filter** with `utils.keepFinite()`
+6. **`apyBase` should NOT be 0** for yield-generating protocols (see APY Validation below)
 
 ### Step 5: Test the Adapter
 
@@ -197,6 +198,38 @@ const main = async () => {
 };
 ```
 
+## APY Validation Rules
+
+**CRITICAL**: Always verify APY values are correct. `apyBase = 0` is usually a bug for yield-generating protocols.
+
+### Required APY Fields by Protocol Type
+
+| Protocol Type | Required APY Field | Notes |
+|---------------|-------------------|-------|
+| **Lending (supply)** | `apyBase > 0` | Interest earned by lenders |
+| **Lending (borrow)** | `apyBaseBorrow > 0` | Interest paid by borrowers |
+| **Liquid Staking** | `apyBase > 0` | Staking rewards (always positive) |
+| **DEX/AMM** | `apyBase > 0` OR `apyReward > 0` | Fee APY or incentives |
+| **Yield Aggregator** | `apyBase > 0` | Strategy returns |
+| **Incentive Pool** | `apyReward > 0` + `rewardTokens` | Reward-only is valid |
+
+### When apyBase = 0 is VALID
+
+Only in these specific cases:
+1. **Reward-only pools**: `apyBase = 0` but `apyReward > 0` with `rewardTokens`
+2. **Borrow-side pools**: `apyBase = 0` but `apyBaseBorrow > 0`
+3. **Treasury vaults**: Non-yield management (document in `poolMeta`)
+
+### Validation Checklist Before Submitting
+
+```
+□ apyBase > 0 for yield-generating pools
+□ APY matches protocol UI (±0.5% variance)
+□ APY is percentage (10.5 not 0.105)
+□ No NaN/Infinity values
+□ If apyReward > 0, rewardTokens array exists
+```
+
 ## Reference Adapters by Category
 
 | Category | Reference |
@@ -215,3 +248,27 @@ cd src/adaptors && npm run test --adapter={protocol-name}
 ```
 
 If tests fail, iterate on fixes until passing.
+
+### Step 8: Log Learnings (Required)
+
+After completing the build, log what you learned:
+
+```bash
+.claude/hooks/log-learning.sh "{protocol}" "build-adapter" "{success|partial|failed}" "{what you learned}" "{tags}"
+```
+
+**Examples:**
+```bash
+# Successful build with interesting pattern
+.claude/hooks/log-learning.sh "morpho-blue" "build-adapter" "success" "Uses isolated markets, each market needs separate pool ID" "isolated-markets,lending"
+
+# Successful build from subgraph
+.claude/hooks/log-learning.sh "velodrome-v3" "build-adapter" "success" "CL pools use different fee calculation than v2" "dex,concentrated-liquidity"
+
+# Partial - some chains not working
+.claude/hooks/log-learning.sh "protocol-x" "build-adapter" "partial" "Ethereum works but Arbitrum contracts not verified" "multi-chain,unverified-contracts"
+```
+
+**Common tags:** `lending`, `dex`, `liquid-staking`, `yield`, `multi-chain`, `subgraph`, `on-chain`, `api`, `aave-fork`, `compound-fork`, `uniswap-fork`
+
+This logs to `.claude/feedback/entries/` for weekly review.

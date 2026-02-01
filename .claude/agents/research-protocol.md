@@ -167,3 +167,29 @@ curl -s "{subgraph-url}" -H "Content-Type: application/json" \
 - Note any rate limits or authentication requirements
 - If documentation requires JavaScript rendering, mention that browser research may be needed
 - Be thorough - missing information leads to adapter bugs
+
+## After Research
+
+### Log Research Findings (Required)
+
+After completing research, log notable findings:
+
+```bash
+.claude/hooks/log-learning.sh "{protocol}" "research-protocol" "{success|partial|failed}" "{key finding}" "{tags}"
+```
+
+**Examples:**
+```bash
+# Found good data source
+.claude/hooks/log-learning.sh "morpho-blue" "research-protocol" "success" "Has comprehensive subgraph with all market data" "subgraph,lending"
+
+# Limited data available
+.claude/hooks/log-learning.sh "new-protocol" "research-protocol" "partial" "No subgraph, API requires auth, will need on-chain calls" "on-chain-only,no-subgraph"
+
+# Protocol not suitable
+.claude/hooks/log-learning.sh "complex-protocol" "research-protocol" "failed" "APY calculation requires off-chain simulation, too complex" "not-feasible"
+```
+
+**Common tags:** `lending`, `dex`, `liquid-staking`, `subgraph`, `on-chain`, `api`, `aave-fork`, `compound-fork`, `no-docs`, `complex-apy`
+
+This logs to `.claude/feedback/entries/` for weekly review.

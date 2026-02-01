@@ -1,0 +1,66 @@
+{
+  "mcpServers": {
+    "subgraph": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "--header",
+        "Authorization:Bearer ${GRAPH_API_KEY}",
+        "https://subgraphs.mcp.thegraph.com/sse"
+      ],
+      "env": {},
+      "description": "Query 15,000+ subgraphs with schema discovery and natural language",
+      "docs": "https://thegraph.com/docs/en/ai-suite/subgraph-mcp/introduction/"
+    },
+    "etherscan": {
+      "command": "npx",
+      "args": ["mcp-etherscan-server"],
+      "env": {
+        "ETHERSCAN_API_KEY": "${ETHERSCAN_API_KEY}"
+      },
+      "description": "Fetch contract ABIs and blockchain data"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": {},
+      "description": "Browser automation for validating adapter data against protocol UIs",
+      "docs": "https://github.com/microsoft/playwright-mcp",
+      "tools": [
+        "browser_navigate - Navigate to a URL",
+        "browser_snapshot - Get accessibility tree (text content)",
+        "browser_screenshot - Capture page screenshot",
+        "browser_click - Click on elements",
+        "browser_type - Type text into inputs",
+        "browser_wait - Wait for elements/conditions"
+      ],
+      "install": "claude mcp add playwright -- npx @playwright/mcp@latest"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "Access TVL adapters and reference code from GitHub"
+    },
+    "solana": {
+      "command": "npx",
+      "args": ["solana-mcp"],
+      "env": {
+        "RPC_URL": "${SOLANA_RPC_URL}"
+      },
+      "description": "Solana blockchain interactions (only needed for Solana protocols)"
+    }
+  },
+  "setup": {
+    "required": {
+      "GRAPH_API_KEY": "https://thegraph.com/studio/apikeys/",
+      "ETHERSCAN_API_KEY": "https://etherscan.io/apis"
+    },
+    "optional": {
+      "GITHUB_TOKEN": "https://github.com/settings/tokens",
+      "SOLANA_RPC_URL": "defaults to mainnet public RPC"
+    }
+  }
+}

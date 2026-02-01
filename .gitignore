@@ -16,6 +16,7 @@ yarn-error.log
 test.sql
 yarn.lock
 .test-adapter-output/
+.claude/feedback/entries/
 
 
 src/adaptors/maverick-protocol/
