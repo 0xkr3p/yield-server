@@ -72,7 +72,35 @@ return pools.filter(utils.keepFinite)
 ```
 **Affected**: build-adapter, fix-adapter
 
-### ERR-VAL-006: Zero APY for Yield Protocol
+### ERR-VAL-006: Pool ID Modified (DATA LOSS RISK)
+**Error**: Historical data lost after adapter fix
+**Cause**: Pool ID format changed during fix, creating a new database entry
+**Severity**: CRITICAL - causes irreversible data loss
+
+**Examples of incorrect changes:**
+```javascript
+// Original (old format)
+pool: SENIOR_POOL_ADDRESS
+
+// WRONG - changed format loses history!
+pool: `${SENIOR_POOL_ADDRESS}-ethereum`.toLowerCase()
+```
+
+**Fix**: ALWAYS preserve the exact original pool ID format
+```javascript
+// Keep original format, add comment explaining why
+pool: SENIOR_POOL_ADDRESS, // Preserve original pool ID format for historical data
+```
+
+**Prevention:**
+1. Before ANY fix, note the EXACT current pool ID format
+2. Never "modernize" or "standardize" pool IDs in existing adapters
+3. Only new adapters should use current conventions
+4. Add a comment if the format looks non-standard but must be preserved
+
+**Affected**: fix-adapter (CRITICAL - check every time)
+
+### ERR-VAL-007: Zero APY for Yield Protocol
 **Error**: `apyBase = 0` for pools with TVL > $1000
 **Cause**: Data source not returning APY, wrong field queried, or broken endpoint
 **Symptoms**:

@@ -24,6 +24,20 @@ Fix Progress:
 - [ ] Step 7: Decide patch vs refactor
 ```
 
+## CRITICAL: Pool ID Preservation
+
+**NEVER modify the `pool` field value when fixing an existing adapter.**
+
+The `pool` field is the unique identifier in the database. Changing it will:
+- Create a new database entry
+- Lose ALL historical data for that pool
+- Require manual database merging to recover
+
+**Before ANY fix:**
+1. Note the EXACT current pool ID format from the existing code
+2. Preserve that format exactly, even if it doesn't match current conventions
+3. Add a comment explaining why the format is preserved if it differs from standard
+
 ## Workflow
 
 ### Step 1: Run Tests

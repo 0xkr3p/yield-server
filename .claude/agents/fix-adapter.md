@@ -27,6 +27,35 @@ You are a specialized agent for debugging and repairing broken yield adapters. Y
 - Fetch web content to verify protocol status
 - Apply fixes iteratively
 
+## CRITICAL: Pool ID Preservation
+
+**NEVER modify the `pool` field value when fixing an existing adapter.**
+
+The `pool` field is the unique identifier in the database. Changing it will:
+- Create a new database entry
+- Lose ALL historical data for that pool
+- Require manual database merging to recover
+
+**Before ANY fix:**
+1. Note the EXACT current pool ID format from the existing code
+2. Preserve that format exactly, even if it doesn't match current conventions
+3. Add a comment explaining why the format is preserved if it differs from standard
+
+**Examples of pool formats to preserve:**
+```javascript
+// Original: just address (old format) - KEEP IT
+pool: SENIOR_POOL_ADDRESS,
+
+// Original: address-chain format - KEEP IT
+pool: `${address}-${chain}`.toLowerCase(),
+
+// Original: custom format - KEEP IT
+pool: `${protocol}-${marketId}`,
+```
+
+**Wrong:** Changing `pool: ADDRESS` to `pool: \`${ADDRESS}-ethereum\`.toLowerCase()`
+**Right:** Keep `pool: ADDRESS` and add comment: `// Preserve original pool ID format`
+
 ## Fix Workflow
 
 ### Step 1: Run Tests to Identify the Problem
