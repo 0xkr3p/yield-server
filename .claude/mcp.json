@@ -22,9 +22,9 @@
     },
     "playwright": {
       "command": "npx",
-      "args": ["@playwright/mcp@latest"],
+      "args": ["@playwright/mcp@latest", "--caps=network,console"],
       "env": {},
-      "description": "Browser automation for validating adapter data against protocol UIs",
+      "description": "Browser automation for validating adapter data and discovering API endpoints",
       "docs": "https://github.com/microsoft/playwright-mcp",
       "tools": [
         "browser_navigate - Navigate to a URL",
@@ -32,9 +32,17 @@
         "browser_screenshot - Capture page screenshot",
         "browser_click - Click on elements",
         "browser_type - Type text into inputs",
-        "browser_wait - Wait for elements/conditions"
+        "browser_wait - Wait for elements/conditions",
+        "browser_network_requests - Returns all network requests (for discovering APIs/subgraphs)",
+        "browser_console_messages - Returns console messages",
+        "browser_evaluate - Execute JavaScript for inspection"
       ],
-      "install": "claude mcp add playwright -- npx @playwright/mcp@latest"
+      "install": "claude mcp add playwright -- npx @playwright/mcp@latest --caps=network,console",
+      "use_cases": [
+        "Discover subgraph endpoints by capturing GraphQL requests",
+        "Find API URLs for APY/TVL data",
+        "Validate adapter output against protocol UI"
+      ]
     },
     "github": {
       "command": "npx",

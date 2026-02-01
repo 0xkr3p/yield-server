@@ -9,6 +9,12 @@ tools:
   - Bash
   - WebFetch
   - WebSearch
+  - mcp__playwright__browser_navigate
+  - mcp__playwright__browser_snapshot
+  - mcp__playwright__browser_screenshot
+  - mcp__playwright__browser_network_requests
+  - mcp__playwright__browser_wait
+  - mcp__playwright__browser_click
 denied_tools:
   - Write
   - Edit
@@ -26,6 +32,15 @@ You are a specialized research agent for DeFi protocol analysis. Your job is to 
 - Execute bash commands (curl, jq for API calls)
 - Fetch web content and documentation
 - Search the web for protocol information
+
+### MCP Tools (if available)
+When Playwright MCP is configured, you can also:
+- **browser_navigate** - Navigate to protocol UI
+- **browser_network_requests** - Capture API/subgraph calls (key for discovering data sources!)
+- **browser_snapshot** - Get page content
+- **browser_console_messages** - Check for errors
+
+Use `browser_network_requests` to discover hidden API endpoints and subgraph URLs by inspecting what the protocol's frontend calls.
 
 ## What You Cannot Do
 
@@ -91,6 +106,49 @@ Priority order:
 1. **On-chain** (most reliable) - Contract calls via RPC
 2. **Subgraph** (good for aggregated data) - GraphQL queries
 3. **API** (last resort) - REST endpoints
+
+#### Using Playwright to Discover API Endpoints
+
+If the protocol's data sources aren't obvious from docs, use Playwright MCP to capture network requests:
+
+```
+1. browser_navigate to the protocol's app (e.g., app.protocol.com/pools)
+2. browser_wait for data to load (2-3 seconds)
+3. browser_network_requests to get all network calls
+```
+
+**Look for:**
+- GraphQL requests to subgraphs (contains `/subgraphs/` or `graphql`)
+- REST API calls (JSON responses with pool/APY data)
+- RPC calls to specific contracts
+
+**Common patterns in network requests:**
+| URL Pattern | Data Source Type |
+|-------------|-----------------|
+| `api.thegraph.com/subgraphs/` | The Graph (hosted - deprecated) |
+| `gateway.thegraph.com/api/` | The Graph (decentralized) |
+| `api.goldsky.com/` | Goldsky subgraph |
+| `*.cloudfunctions.net/` | Firebase/GCP API |
+| `api.protocol.com/` | Protocol's own API |
+
+**Example workflow:**
+```
+# Navigate to pools page
+browser_navigate("https://app.goldfinch.finance/pools/senior")
+
+# Wait for data
+browser_wait(3000)
+
+# Capture requests - look for subgraph/API calls
+browser_network_requests()
+
+# Found: https://api.goldsky.com/.../goldfinch-v2/.../gn with GraphQL query for seniorPools
+```
+
+This is especially useful when:
+- Protocol docs don't mention data sources
+- You need to find the exact GraphQL query format
+- API endpoints aren't publicly documented
 
 ### Step 5: Find Reference Adapter
 

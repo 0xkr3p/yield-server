@@ -11,6 +11,7 @@ tools:
   - mcp__playwright__browser_screenshot
   - mcp__playwright__browser_click
   - mcp__playwright__browser_wait
+  - mcp__playwright__browser_network_requests
 denied_tools:
   - Write
   - Edit
@@ -103,6 +104,25 @@ browser_screenshot: Capture the pools/vaults page for visual reference
 ```
 
 This helps verify what the UI actually shows and can be referenced if values seem wrong.
+
+### Step 5b: Capture Network Requests (Optional but Powerful)
+
+Use `browser_network_requests` to see exactly what API data the UI is using:
+
+```
+browser_network_requests: Get all API/subgraph calls made by the page
+```
+
+**Why this is useful:**
+- See the exact values the UI received from APIs
+- Compare raw API response to what the adapter fetches
+- Identify if adapter is using the same data source as the UI
+- Find the correct endpoint if adapter uses wrong one
+
+**Look for:**
+- GraphQL queries with APY/TVL data
+- REST API responses with pool data
+- The exact values being displayed (before UI formatting)
 
 ### Step 6: Parse UI Values
 
