@@ -44,14 +44,14 @@
         "Validate adapter output against protocol UI"
       ]
     },
-    "github": {
-      "command": "npx",
-      "args": ["@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
-      },
-      "description": "Access TVL adapters and reference code from GitHub"
-    },
+    // "github": {
+    //   "command": "npx",
+    //   "args": ["@modelcontextprotocol/server-github"],
+    //   "env": {
+    //     "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+    //   },
+    //   "description": "Access TVL adapters and reference code from GitHub"
+    // },
     "solana": {
       "command": "npx",
       "args": ["solana-mcp"],
