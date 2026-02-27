@@ -5,7 +5,7 @@ const sdk = require('@defillama/sdk');
 const utils = require('../utils');
 const { aTokenAbi } = require('../aave-v3/abi');
 const poolAbi = require('../aave-v3/poolAbi');
-const abiSKYFarm = require('./abiSKYFarm.json');
+const abiSPKFarm = require('./abiSKYFarm.json');
 
 const sparkChains = ['ethereum', 'gnosis'];
 
@@ -138,7 +138,7 @@ async function fetchV3Pools(chain) {
 const skyFarm = async () => {
   const stakingRewards = '0x0650CAF159C5A49f711e8169D4336ECB9b950275';
   const USDS = '0xdC035D45d973E3EC169d2276DDab16f1e407384F';
-  const SKY = '0x56072C95FAA701256059aa122697B133aDEd9279';
+  const SPK = '0xc20059e0317DE91738d13af027DfC4a50781b066';
 
   const totalSupply =
     (
@@ -151,18 +151,18 @@ const skyFarm = async () => {
   const stakingToken = (
     await sdk.api.abi.call({
       target: stakingRewards,
-      abi: abiSKYFarm.find((m) => m.name === 'stakingToken'),
+      abi: abiSPKFarm.find((m) => m.name === 'stakingToken'),
     })
   ).output;
 
   const prices = await axios.get(
-    `https://coins.llama.fi/prices/current/${[USDS, SKY]
+    `https://coins.llama.fi/prices/current/${[USDS, SPK]
       .map((i) => `ethereum:${i}`)
       .join(',')}`
   );
 
   const priceUSDS = prices.data.coins[`ethereum:${USDS}`].price;
-  const priceSKY = prices.data.coins[`ethereum:${SKY}`].price;
+  const priceSPK = prices.data.coins[`ethereum:${SPK}`].price;
 
   const tvlUsd = totalSupply * priceUSDS;
 
@@ -170,12 +170,12 @@ const skyFarm = async () => {
     (
       await sdk.api.abi.call({
         target: stakingRewards,
-        abi: abiSKYFarm.find((m) => m.name === 'rewardRate'),
+        abi: abiSPKFarm.find((m) => m.name === 'rewardRate'),
       })
     ).output / 1e18;
 
   const secPerDay = 86400;
-  const apyReward = ((rewardRate * secPerDay * 365 * priceSKY) / tvlUsd) * 100;
+  const apyReward = ((rewardRate * secPerDay * 365 * priceSPK) / tvlUsd) * 100;
 
   return [
     {
@@ -183,11 +183,12 @@ const skyFarm = async () => {
       chain: 'Ethereum',
       project: 'sparklend',
       symbol: 'USDS',
-      poolMeta: 'SKY Farming Pool',
+      poolMeta: 'SPK Farming Pool',
       tvlUsd: totalSupply * priceUSDS,
       apyReward,
       underlyingTokens: [stakingToken],
-      rewardTokens: [SKY],
+      rewardTokens: [SPK],
+      url: 'https://app.spark.fi/spk/farm',
     },
   ];
 };
