@@ -227,6 +227,8 @@ const excludeAdaptors = [
   'nayms',
   'berancia',
   'crowdswap',
+  'wise-lending-v2',
+  'covo-v2',
 ];
 
 const excludePools = [
