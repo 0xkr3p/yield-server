@@ -229,6 +229,7 @@ const excludeAdaptors = [
   'crowdswap',
   'wise-lending-v2',
   'covo-v2',
+  'arbitrum-exchange-v2',
 ];
 
 const excludePools = [
