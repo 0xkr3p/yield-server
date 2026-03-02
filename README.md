@@ -55,7 +55,7 @@ interface Pool {
 
 #### `token` and `searchTokenOverride`
 
-- **`token`** — The pool's token contract address. This is the actual token associated with the pool (e.g. the LP token, vault receipt token, or staked asset address). Currently optional but will eventually be required for all adapters.
+- **`token`** — The pool's token contract address. This is the actual token associated with the pool (e.g. the LP token, vault receipt token, or staked asset address). Currently optional but will eventually be required for all adaptors.
 - **`searchTokenOverride`** — Used for LSTs (Liquid Staking Tokens), LRTs (Liquid Restaking Tokens), and similar derivative tokens where the pool's token address differs from the underlying token. When set, this address is used instead of the underlying token for search and display matching. Only set this if the default matching produces incorrect results.
 
 ```typescript
