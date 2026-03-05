@@ -13,7 +13,6 @@ jobs:
           ALCHEMY_CONNECTION_ARBITRUM: ${{ secrets.ALCHEMY_CONNECTION_ARBITRUM }}
           ALCHEMY_CONNECTION_ETHEREUM: ${{ secrets.ALCHEMY_CONNECTION_ETHEREUM }}
           ALCHEMY_CONNECTION_POLYGON: ${{ secrets.ALCHEMY_CONNECTION_POLYGON }}
-          COMMENT_TOKEN: ${{ secrets.LLAMATESTER_TOKEN }}
         run: |
           RUN_FILES=$(
             MODIFIED="${{ steps.file_changes.outputs.modified_files }}" \
