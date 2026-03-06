@@ -127,9 +127,14 @@ const main = async () => {
 
     for (const pool of pools.filter(
       (x) =>
-        !x.protocol ||
-        !protocolsBlacklist.includes(x.protocol.id) ||
-        poolsWhitelist.includes(x.identifier)
+        // Filter out ERC20LOGPROCESSOR HOLD campaigns - these are "hold token X,
+        // get rewarded" promotions, not real DeFi pools. They create ghost APRs
+        // on DefiLlama (e.g. "Hold XAUt" showing as a yield pool).
+        // Other HOLD types (IPOR_STAKING, CONVEX, etc.) are legitimate DeFi.
+        !(x.type === 'ERC20LOGPROCESSOR' && x.action === 'HOLD') &&
+        (!x.protocol ||
+          !protocolsBlacklist.includes(x.protocol.id) ||
+          poolsWhitelist.includes(x.identifier))
     )) {
       try {
         const poolAddress = pool.identifier;
