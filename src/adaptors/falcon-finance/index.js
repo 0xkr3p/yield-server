@@ -45,7 +45,8 @@ function ratioToDaily(rNow, rPrev, secondsBigOrNum) {
 }
 
 async function computeApyBase(vault) {
-  const nowTs = Math.floor(Date.now() / 1e3)
+  // 60s safety margin so coins.llama.fi/block never 400s on "timestamp after now"
+  const nowTs = Math.floor(Date.now() / 1e3) - 60
   const WEEK = 7 * DAY
 
   const [{ block: bNow, ts: tNow }, { block: bPast, ts: tPast }] = await Promise.all([
