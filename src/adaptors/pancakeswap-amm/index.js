@@ -67,12 +67,16 @@ async function fetchExplorerPoolsByAddress(chain, lpAddresses, concurrency = 10)
 const computeFeeApr = (p) => {
   const tvl = Number(p.tvlUSD);
   if (!tvl) return undefined;
-  return (Number(p.volumeUSD24h) * 0.0025 * 365 * 100) / tvl;
+  const apr = (Number(p.volumeUSD24h) * 0.0025 * 365 * 100) / tvl;
+  return Number.isFinite(apr) ? apr : undefined;
 };
 
 function buildPoolFromExplorer(p, chain) {
+  if (!p || !p.id) return null;
+  if (!p.token0?.id || !p.token1?.id || !p.token0?.symbol || !p.token1?.symbol) return null;
   const tvlUsd = Number(p.tvlUSD);
   if (!tvlUsd) return null;
+
   const feeUsd7d = Number(p.volumeUSD7d) * 0.0025;
   return {
     pool: utils.formatAddress(p.id),
@@ -94,6 +98,14 @@ async function getPoolsApy(chain) {
     data = await fetchExplorerPools(chain);
   } catch (e) {
     console.error(`pancakeswap-amm: failed to fetch ${chain} pools after retries: ${e.message}`);
+    return [];
+  }
+  if (!Array.isArray(data)) {
+    console.error(
+      `pancakeswap-amm: unexpected ${chain} pools payload shape (expected array, got ${
+        data === null ? 'null' : typeof data
+      }): ${JSON.stringify(data)?.slice(0, 200)}`
+    );
     return [];
   }
   return data.map((p) => buildPoolFromExplorer(p, chain)).filter(Boolean);
