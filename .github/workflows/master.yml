@@ -58,3 +58,4 @@ jobs:
           LLAMA_INDEXER_V2_ENDPOINT: ${{ secrets.LLAMA_INDEXER_V2_ENDPOINT }}
           LLAMA_INDEXER_V2_API_KEY: ${{ secrets.LLAMA_INDEXER_V2_API_KEY }}
           PROJECT_0_API_KEY: ${{ secrets.PROJECT_0_API_KEY }}
+          SANCTUM_API_KEY: ${{ secrets.SANCTUM_API_KEY }}
