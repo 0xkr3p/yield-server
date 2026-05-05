@@ -26,7 +26,7 @@ const poolsQuery = gql`
       token1 { id symbol decimals }
       feeTier
       totalValueLockedUSD
-      poolDayData(first: 1, orderBy: date, orderDirection: desc) {
+      poolDayData(first: 7, orderBy: date, orderDirection: desc) {
         date
         volumeUSD
         feesUSD
@@ -59,7 +59,8 @@ async function apy() {
 
   const formatted = pools
     .map((p) => {
-      const day = p.poolDayData?.[0];
+      const days = p.poolDayData || [];
+      const day = days[0];
       const tvlUsd = Number(day?.tvlUSD) || Number(p.totalValueLockedUSD);
       if (!Number.isFinite(tvlUsd) || tvlUsd < MIN_TVL_USD) return null;
 
@@ -68,6 +69,12 @@ async function apy() {
       const feesUsd = Number(day?.feesUSD);
       const apyBase = Number.isFinite(feesUsd)
         ? (feesUsd * 365) / tvlUsd * 100
+        : NaN;
+
+      const fees7d = days.reduce((s, d) => s + (Number(d.feesUSD) || 0), 0);
+      const volume7d = days.reduce((s, d) => s + (Number(d.volumeUSD) || 0), 0);
+      const apyBase7d = days.length
+        ? ((fees7d / days.length) * 365) / tvlUsd * 100
         : NaN;
 
       const feePercent = Number(p.feeTier) / 10000;
@@ -81,10 +88,12 @@ async function apy() {
         symbol: utils.formatSymbol(`${p.token0.symbol}-${p.token1.symbol}`),
         tvlUsd,
         apyBase,
+        apyBase7d,
         underlyingTokens: [token0, token1],
         poolMeta: `${feePercent}%`,
         url: `https://app.hyperswap.exchange/#/add/${tokenForUrl(token0)}/${tokenForUrl(token1)}/${p.feeTier}`,
         volumeUsd1d: Number(day?.volumeUSD) || 0,
+        volumeUsd7d: volume7d,
       };
     })
     .filter(Boolean);
