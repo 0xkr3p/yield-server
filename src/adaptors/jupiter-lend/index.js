@@ -11,9 +11,6 @@ const getEarnPools = (lendingTokens) =>
     const decimals = token.asset.decimals;
     const tvlUsd = (Number(token.totalAssets) / 10 ** decimals) * price;
 
-    // supplyRate = interest earned from borrowers only. Underlying token's intrinsic
-    // staking yield (asset.stakingApr) is reported by that token's own pool, so excluded
-    // here to avoid double-counting in DefiLlama aggregations.
     const apyBase = utils.aprToApy(Number(token.supplyRate) / 100);
     const apyReward = token.rewardsRate
       ? utils.aprToApy(bpsToApr(token.rewardsRate))
@@ -34,8 +31,6 @@ const getEarnPools = (lendingTokens) =>
     };
   });
 
-// Underlying token's intrinsic staking yield (supplyToken.stakingApr) is reported by
-// that token's own pool, so excluded here to avoid double-counting.
 const calcVaultSupplyApy = (vault) =>
   utils.aprToApy(
     (Number(vault.supplyRateLiquidity) + Number(vault.supplyRateMagnifier)) /
