@@ -11,11 +11,10 @@ const getEarnPools = (lendingTokens) =>
     const decimals = token.asset.decimals;
     const tvlUsd = (Number(token.totalAssets) / 10 ** decimals) * price;
 
-    // supplyRate = interest earned from borrowers (excludes rewardsRate to avoid double-counting).
+    // supplyRate = interest earned from borrowers only. Underlying token's intrinsic
+    // staking yield (asset.stakingApr) is reported by that token's own pool, so excluded
+    // here to avoid double-counting in DefiLlama aggregations.
     const apyBase = utils.aprToApy(Number(token.supplyRate) / 100);
-    const stakingApy = token.asset.stakingApr
-      ? utils.aprToApy(bpsToApr(token.asset.stakingApr))
-      : 0;
     const apyReward = token.rewardsRate
       ? utils.aprToApy(bpsToApr(token.rewardsRate))
       : 0;
@@ -26,7 +25,7 @@ const getEarnPools = (lendingTokens) =>
       project: 'jupiter-lend',
       symbol: utils.formatSymbol(token.asset.symbol),
       tvlUsd,
-      apyBase: apyBase + stakingApy,
+      apyBase,
       apyReward: apyReward > 0 ? apyReward : null,
       rewardTokens: token.rewardsRate ? [token.assetAddress] : undefined,
       underlyingTokens: [token.assetAddress],
@@ -35,17 +34,13 @@ const getEarnPools = (lendingTokens) =>
     };
   });
 
-const calcVaultSupplyApy = (vault) => {
-  const marketApy = utils.aprToApy(
+// Underlying token's intrinsic staking yield (supplyToken.stakingApr) is reported by
+// that token's own pool, so excluded here to avoid double-counting.
+const calcVaultSupplyApy = (vault) =>
+  utils.aprToApy(
     (Number(vault.supplyRateLiquidity) + Number(vault.supplyRateMagnifier)) /
       100
   );
-  const stakingApy = vault.supplyToken.stakingApr
-    ? utils.aprToApy(bpsToApr(vault.supplyToken.stakingApr))
-    : 0;
-
-  return marketApy + stakingApy;
-};
 
 const calcVaultRewardApy = (vault, side) =>
   (vault.rewards || [])
