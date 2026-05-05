@@ -132,7 +132,7 @@ async function getPoolDayStats(pool, fromBlock, toBlock, decimalsByAddr, pricesB
     });
   } catch (e) {
     console.warn(`Swap log fetch failed for ${pool.address}: ${e.message}`);
-    return { volumeUsd1d: 0, feesUsd1d: 0 };
+    return { volumeUsd1d: NaN, feesUsd1d: NaN };
   }
 
   let volume0In = 0n;
@@ -200,7 +200,9 @@ async function apy() {
         decimalsByAddr,
         prices.pricesByAddress
       );
-      const apyBase = pool.tvlUsd > 0 ? (feesUsd1d * 365) / pool.tvlUsd * 100 : 0;
+      // tvlUsd is guaranteed >= MIN_TVL_USD by the filter above; if feesUsd1d is NaN
+      // (swap-log fetch failed), apyBase stays NaN and utils.keepFinite drops the pool.
+      const apyBase = (feesUsd1d * 365) / pool.tvlUsd * 100;
       const feePercent = Number(pool.fee) / 10000;
 
       return {
@@ -211,7 +213,7 @@ async function apy() {
           `${symbolByAddr[pool.token0] || '?'}-${symbolByAddr[pool.token1] || '?'}`
         ),
         tvlUsd: pool.tvlUsd,
-        apyBase: apyBase || 0,
+        apyBase,
         underlyingTokens: [pool.token0, pool.token1],
         poolMeta: `${feePercent}%`,
         url: `https://app.hyperswap.exchange/#/add/${tokenForUrl(pool.token0)}/${tokenForUrl(pool.token1)}/${pool.fee}`,
