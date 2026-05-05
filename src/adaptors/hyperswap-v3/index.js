@@ -12,6 +12,9 @@ const FACTORY = '0xb1c0fa0b789320044a6f623cfe5ebda9562602e3';
 const FROM_BLOCK = 15000;
 const BLOCK_TIME_SECONDS = 1;
 const MIN_TVL_USD = 10000;
+// App uses 'HYPE' alias in URL paths instead of WHYPE's address.
+const WHYPE = '0x5555555555555555555555555555555555555555';
+const tokenForUrl = (addr) => (addr.toLowerCase() === WHYPE ? 'HYPE' : addr);
 
 const EVENTS = {
   PoolCreated:
@@ -186,33 +189,36 @@ async function apy() {
     })
     .filter(Boolean);
 
-  const withDayStats = [];
-  for (const pool of enriched) {
-    const { volumeUsd1d, feesUsd1d } = await getPoolDayStats(
-      pool,
-      fromBlock24h,
-      toBlock,
-      decimalsByAddr,
-      prices.pricesByAddress
-    );
-    const apyBase = pool.tvlUsd > 0 ? (feesUsd1d * 365) / pool.tvlUsd * 100 : 0;
-    const feePercent = Number(pool.fee) / 10000;
+  const withDayStats = await sdk.util.runInPromisePool({
+    items: enriched,
+    concurrency: 5,
+    processor: async (pool) => {
+      const { volumeUsd1d, feesUsd1d } = await getPoolDayStats(
+        pool,
+        fromBlock24h,
+        toBlock,
+        decimalsByAddr,
+        prices.pricesByAddress
+      );
+      const apyBase = pool.tvlUsd > 0 ? (feesUsd1d * 365) / pool.tvlUsd * 100 : 0;
+      const feePercent = Number(pool.fee) / 10000;
 
-    withDayStats.push({
-      pool: pool.address,
-      chain: utils.formatChain(CHAIN_DISPLAY),
-      project: PROJECT,
-      symbol: utils.formatSymbol(
-        `${symbolByAddr[pool.token0] || '?'}-${symbolByAddr[pool.token1] || '?'}`
-      ),
-      tvlUsd: pool.tvlUsd,
-      apyBase: apyBase || 0,
-      underlyingTokens: [pool.token0, pool.token1],
-      poolMeta: `${feePercent}%`,
-      url: `https://app.hyperswap.exchange/#/pools/${pool.address}`,
-      volumeUsd1d,
-    });
-  }
+      return {
+        pool: pool.address,
+        chain: utils.formatChain(CHAIN_DISPLAY),
+        project: PROJECT,
+        symbol: utils.formatSymbol(
+          `${symbolByAddr[pool.token0] || '?'}-${symbolByAddr[pool.token1] || '?'}`
+        ),
+        tvlUsd: pool.tvlUsd,
+        apyBase: apyBase || 0,
+        underlyingTokens: [pool.token0, pool.token1],
+        poolMeta: `${feePercent}%`,
+        url: `https://app.hyperswap.exchange/#/add/${tokenForUrl(pool.token0)}/${tokenForUrl(pool.token1)}/${pool.fee}`,
+        volumeUsd1d,
+      };
+    },
+  });
 
   const withRewards = await addMerklRewardApy(withDayStats, 'hyperswap');
   return withRewards.filter((p) => utils.keepFinite(p));
