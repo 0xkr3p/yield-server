@@ -2,7 +2,7 @@ const sdk = require('@defillama/sdk');
 const axios = require('axios');
 
 const weETH = '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee';
-const eETH = '0x35fA164735182de50811E8e2E824cFb9B6118ac2'
+const eETH = '0x35fA164735182de50811E8e2E824cFb9B6118ac2';
 const eigen = '0xec53bf9167f50cdeb3ae105f56099aaab9061f83';
 const lrt2 = '0x8F08B70456eb22f6109F57b8fafE862ED28E6040';
 
@@ -10,9 +10,11 @@ const eBTC = '0x657e8C867D8B37dCC18fA4Caead9C45EB088C642';
 const eBTCAccountant = '0x1b293DC39F94157fA0D1D36d7e0090C8B8B8c13F';
 const LBTC = '0x8236a87084f8B84306f72007F36F2618A5634494';
 const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
+const cbBTC = '0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf';
 
 // Lombard API for LBTC staking APY (eBTC is backed by LBTC)
-const LOMBARD_APY_API = 'https://mainnet.prod.lombard.finance/api/v1/analytics/estimated-apy?partner_id=';
+const LOMBARD_APY_API =
+  'https://mainnet.prod.lombard.finance/api/v1/analytics/estimated-apy?partner_id=';
 
 const apy = async () => {
   const totalSupply =
@@ -77,20 +79,28 @@ const apy = async () => {
       ? ((eBTCRateCurrent - eBTCRate7dAgo) / eBTCRate7dAgo / 7) * 365 * 100
       : 0;
 
-
   const optimismApi = new sdk.ChainApi({ chain: 'optimism' });
-  const restakingWeeklyEigen = Number(await optimismApi.call({
-    target: '0xAB7590CeE3Ef1A863E9A5877fBB82D9bE11504da',
-    abi: 'function categoryTVL(string _category) view returns (uint256)',
-    params: [eigen]
-  })) / 1e18;
+  const restakingWeeklyEigen =
+    Number(
+      await optimismApi.call({
+        target: '0xAB7590CeE3Ef1A863E9A5877fBB82D9bE11504da',
+        abi: 'function categoryTVL(string _category) view returns (uint256)',
+        params: [eigen],
+      })
+    ) / 1e18;
 
   const priceKey = `ethereum:${weETH}`;
   const priceKeyEigen = `ethereum:${eigen}`;
   const priceKeyEETH = `ethereum:${eETH}`;
   const priceKeyWBTC = `ethereum:${WBTC}`;
 
-  const [eigenPriceRes, eethPriceRes, weethPriceRes, wbtcPriceRes, lombardApyRes] = await Promise.all([
+  const [
+    eigenPriceRes,
+    eethPriceRes,
+    weethPriceRes,
+    wbtcPriceRes,
+    lombardApyRes,
+  ] = await Promise.all([
     axios.get(`https://coins.llama.fi/prices/current/ethereum:${eigen}`),
     axios.get(`https://coins.llama.fi/prices/current/ethereum:${eETH}`),
     axios.get(`https://coins.llama.fi/prices/current/${priceKey}`),
@@ -109,7 +119,10 @@ const apy = async () => {
   const eBTCApyBase = eBTCApr1d > 0 ? eBTCApr1d : lombardApy;
   const eBTCApyBase7d = eBTCApr7d > 0 ? eBTCApr7d : lombardApy;
 
-  const restakingApy = (restakingWeeklyEigen * eigenPrice) / 7 / (totalSupplyEETH * eethPrice) * 365 * 100;
+  const restakingApy =
+    ((restakingWeeklyEigen * eigenPrice) / 7 / (totalSupplyEETH * eethPrice)) *
+    365 *
+    100;
 
   const eBTCTotalSupply =
     (
@@ -131,7 +144,9 @@ const apy = async () => {
       apyBase: apr1d,
       apyBase7d: apr7d,
       apyReward: restakingApy,
-      ...(Number(weETHRates[0].output) / 1e18 > 0 && { pricePerShare: Number(weETHRates[0].output) / 1e18 }),
+      ...(Number(weETHRates[0].output) / 1e18 > 0 && {
+        pricePerShare: Number(weETHRates[0].output) / 1e18,
+      }),
       underlyingTokens: ['0x0000000000000000000000000000000000000000'],
       searchTokenOverride: weETH,
       rewardTokens: [lrt2],
@@ -146,8 +161,10 @@ const apy = async () => {
       apyBase: eBTCApyBase,
       apyBase7d: eBTCApyBase7d,
       // eBTC is 8-dec; accountant returns rate in share decimals.
-      ...(eBTCRateCurrent / 1e8 > 0 && { pricePerShare: eBTCRateCurrent / 1e8 }),
-      underlyingTokens: [LBTC, WBTC],
+      ...(eBTCRateCurrent / 1e8 > 0 && {
+        pricePerShare: eBTCRateCurrent / 1e8,
+      }),
+      underlyingTokens: [LBTC, WBTC, cbBTC],
       searchTokenOverride: eBTC,
       url: 'https://ether.fi/app/ebtc',
     },
